@@ -66,8 +66,8 @@ if dein#load_state(expand('$HOME/vim-env'))
   " CSSComb
   " call dein#add('csscomb/vim-csscomb')
   " Stylus
-  call dein#add('wavded/vim-stylus')
-  " call dein#add('cakebaker/scss-syntax.vim')
+  " call dein#add('wavded/vim-stylus')
+  call dein#add('cakebaker/scss-syntax.vim')
 
   " Vue
   call dein#add('posva/vim-vue')
@@ -82,13 +82,18 @@ if dein#load_state(expand('$HOME/vim-env'))
   " Autoclose pair characters
   call dein#add('Raimondi/delimitMate')
   " Typescript
-  " call dein#add('leafgarland/typescript-vim')
+  call dein#add('leafgarland/typescript-vim')
+  " React
+  call dein#add('vim-scripts/vim-jsx-pretty')
 
   " Smart comments
   call dein#add('tomtom/tcomment_vim')
 
   " Static linting
   call dein#add('scrooloose/syntastic')
+  " local eslint config
+  call dein#add('mtscout6/syntastic-local-eslint.vim')
+
   " Add usefull hotkey for operation with surroundings
   " cs{what}{towhat} - inside '' or [] or something like this allow
   " change surroundings symbols to another
@@ -122,6 +127,17 @@ if dein#load_state(expand('$HOME/vim-env'))
   " Vim argwrap
   call dein#add('FooSoft/vim-argwrap')
 
+  " Go lang
+  call dein#add('fatih/vim-go')
+
+  " Prettier
+  call dein#add('prettier/vim-prettier')
+
+  " C#
+  call dein#add('OrangeT/vim-csharp')
+  call dein#add('OmniSharp/omnisharp-vim')
+  " call dein#add('juancampa/solvent.vim')
+
   call dein#end()
   call dein#save_state()
 endif
@@ -153,7 +169,7 @@ set cursorline
 set colorcolumn=80,120
 set autoindent
 set smartindent
-set expandtab
+" set expandtab
 set smarttab
 set shiftwidth=2
 set tabstop=2
@@ -269,6 +285,7 @@ let g:delimitMate_expand_space = 1
 " Vim-airline
 let g:airline_theme='understated'
 let g:airline#extensions#tabline#enabled = 1
+let g:airline#extensions#whitespace#mixed_indent_algo = 2
 let g:airline#extensions#tabline#show_buffers = 0
 let g:airline#extensions#tabline#fnamemod = ':t'
 let g:airline_section_y = ''
@@ -392,3 +409,59 @@ endif
 
 " Tell Neosnippet about the other snippets
 let g:neosnippet#snippets_directory='~/vim-env/snippets/'
+
+" C# server https://github.com/OmniSharp/omnisharp-vim
+" let g:OmniSharp_server_stdio = 1
+" let g:OmniSharp_server_use_mono = 1
+let g:OmniSharp_highlight_types = 2
+let g:OmniSharp_timeout = 5
+let g:ale_linters = { 'cs': ['OmniSharp'] }
+
+augroup omnisharp_commands
+    autocmd!
+
+    " Show type information automatically when the cursor stops moving
+    autocmd CursorHold *.cs call OmniSharp#TypeLookupWithoutDocumentation()
+
+    " The following commands are contextual, based on the cursor position.
+    autocmd FileType cs nnoremap <buffer> gd :OmniSharpGotoDefinition<CR>
+    autocmd FileType cs nnoremap <buffer> <Leader>fi :OmniSharpFindImplementations<CR>
+    autocmd FileType cs nnoremap <buffer> <Leader>fs :OmniSharpFindSymbol<CR>
+    autocmd FileType cs nnoremap <buffer> <Leader>fu :OmniSharpFindUsages<CR>
+
+    " Finds members in the current buffer
+    autocmd FileType cs nnoremap <buffer> <Leader>fm :OmniSharpFindMembers<CR>
+
+    autocmd FileType cs nnoremap <buffer> <Leader>fx :OmniSharpFixUsings<CR>
+    autocmd FileType cs nnoremap <buffer> <Leader>tt :OmniSharpTypeLookup<CR>
+    autocmd FileType cs nnoremap <buffer> <Leader>dc :OmniSharpDocumentation<CR>
+    autocmd FileType cs nnoremap <buffer> <C-\> :OmniSharpSignatureHelp<CR>
+    autocmd FileType cs inoremap <buffer> <C-\> <C-o>:OmniSharpSignatureHelp<CR>
+
+    " Navigate up and down by method/property/field
+    autocmd FileType cs nnoremap <buffer> <C-k> :OmniSharpNavigateUp<CR>
+    autocmd FileType cs nnoremap <buffer> <C-j> :OmniSharpNavigateDown<CR>
+
+    " Find all code errors/warnings for the current solution and populate the quickfix window
+    autocmd FileType cs nnoremap <buffer> <Leader>cc :OmniSharpGlobalCodeCheck<CR>
+augroup END
+
+" Contextual code actions (uses fzf, CtrlP or unite.vim when available)
+nnoremap <Leader><Space> :OmniSharpGetCodeActions<CR>
+" Run code actions with text selected in visual mode to extract method
+xnoremap <Leader><Space> :call OmniSharp#GetCodeActions('visual')<CR>
+
+" Rename with dialog
+nnoremap <Leader>nm :OmniSharpRename<CR>
+nnoremap <F2> :OmniSharpRename<CR>
+" Rename without dialog - with cursor on the symbol to rename: `:Rename newname`
+command! -nargs=1 Rename :call OmniSharp#RenameTo("<args>")
+
+nnoremap <Leader>cf :OmniSharpCodeFormat<CR>
+
+" Start the omnisharp server for the current solution
+nnoremap <Leader>ss :OmniSharpStartServer<CR>
+nnoremap <Leader>sp :OmniSharpStopServer<CR>
+
+" Enable snippet completion
+" let g:OmniSharp_want_snippet=1
